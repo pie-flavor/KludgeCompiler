@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+build/
+target/
+out/
+run/
+.project
+.classpath
+.settings/
+.vs/
+Desktop.ini
+Thumbs.db
+_MACOSX
+.DS_Store
