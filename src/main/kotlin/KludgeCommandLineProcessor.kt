@@ -14,10 +14,12 @@ class KludgeCommandLineProcessor : CommandLineProcessor {
         CliOption("onByDefault", "<true|false>", "whether optional-to-nullable is on by default")
     )
 
-    override fun processOption(option: AbstractCliOption, value: String, configuration: CompilerConfiguration) =
-            when (val name = option.optionName) {
-                "onByDefault" -> configuration.put(Keys.ON_BY_DEFAULT, value.toBoolean())
-                else -> error("Unexpected config option $name")
-            }
+    override fun processOption(option: AbstractCliOption, value: String, configuration: CompilerConfiguration) {
+        println("Processing CLI options")
+        return when (val name = option.optionName) {
+            "onByDefault" -> configuration.put(Keys.ON_BY_DEFAULT, value.toBoolean())
+            else -> error("Unexpected config option $name")
+        }
+    }
 
 }

@@ -13,6 +13,7 @@ class KludgeComponentRegistrar : ComponentRegistrar {
         if (configuration[Keys.ON_BY_DEFAULT] == false) {
             return
         }
+        println("Registering components")
         ClassBuilderInterceptorExtension.registerExtension(project, KludgeClassGenerationInterceptor())
     }
 

@@ -13,10 +13,13 @@ class KludgeClassGenerationInterceptor : ClassBuilderInterceptorExtension {
         interceptedFactory: ClassBuilderFactory,
         bindingContext: BindingContext,
         diagnostics: DiagnosticSink
-    ): ClassBuilderFactory = object: ClassBuilderFactory by interceptedFactory {
+    ): ClassBuilderFactory {
+        println("Intercepting class building")
+        return object: ClassBuilderFactory by interceptedFactory {
 
-        override fun newClassBuilder(origin: JvmDeclarationOrigin): ClassBuilder = KludgeClassBuilder(interceptedFactory.newClassBuilder(origin))
+            override fun newClassBuilder(origin: JvmDeclarationOrigin): ClassBuilder = KludgeClassBuilder(interceptedFactory.newClassBuilder(origin))
 
+        }
     }
 
 }

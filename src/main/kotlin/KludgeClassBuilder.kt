@@ -30,6 +30,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
+        println("Method creator called")
         val original = super.newMethod(origin, access, name, desc, signature, exceptions)
         val function = original as? FunctionDescriptor ?: return original
         val annotation = function.annotations.findAnnotation(FqName(timingsAnnotation)) ?: return original
@@ -41,6 +42,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
             val jumpTo = Label()
 
             override fun visitCode() {
+                println("Visiting method header")
                 super.visitCode()
                 InstructionAdapter(this).apply {
                     invokestatic("flavor/pie/kludge/GlobalKt", "getPlugin", "()Ljava/lang/Object;", false) // plugin
@@ -56,6 +58,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
                 when (opcode) {
                     Opcodes.RETURN, Opcodes.ARETURN, Opcodes.IRETURN, Opcodes.DRETURN, Opcodes.FRETURN,
                     Opcodes.LRETURN -> {
+                        println("Visiting return code")
                         InstructionAdapter(this).apply {
                             visitVarInsn(Opcodes.ALOAD, timingsVar) // timings
                             aconst(null) // timings | null
