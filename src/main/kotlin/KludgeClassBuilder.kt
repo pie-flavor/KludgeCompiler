@@ -45,7 +45,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
                 InstructionAdapter(this).apply {
                     invokestatic("flavor/pie/kludge/GlobalKt", "getPlugin", "()Ljava/lang/Object;", false) // plugin
                     visitLdcInsn(timingName) // plugin | name constant
-                    invokestatic("co/aikar/timings/Timings", "of", "(Ljava/lang/Object;Ljava/lang/String;)Lco/aikar/timings/Timing;", false) // timing
+                    invokestatic("co/aikar/timings/Timings", "ofStart", "(Ljava/lang/Object;Ljava/lang/String;)Lco/aikar/timings/Timing;", false) // timing
                     store(timingsVar, Type.getType("Lco/aikar/timings/Timings;")) // _
                     visitTryCatchBlock(tryStart, tryEnd, jumpTo, null)
                     visitLabel(tryStart)
