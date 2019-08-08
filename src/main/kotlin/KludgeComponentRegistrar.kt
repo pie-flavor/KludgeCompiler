@@ -9,6 +9,10 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 @AutoService(ComponentRegistrar::class)
 class KludgeComponentRegistrar : ComponentRegistrar {
 
+    init {
+        println("Component registrar instantiated")
+    }
+
     override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
         if (configuration[Keys.ON_BY_DEFAULT] == false) {
             return
