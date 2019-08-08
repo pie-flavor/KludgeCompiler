@@ -31,7 +31,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
         exceptions: Array<out String>?
     ): MethodVisitor {
         val original = super.newMethod(origin, access, name, desc, signature, exceptions)
-        val function = original as? FunctionDescriptor ?: return original
+        val function = origin.descriptor as? FunctionDescriptor ?: return original
         val annotation = function.annotations.findAnnotation(FqName(timingsAnnotation)) ?: return original
         val timingName = annotation.allValueArguments.getValue(Name.identifier("value")).value as? String ?: function.name.identifier
         return object: MethodVisitor(Opcodes.ASM5, original) {
