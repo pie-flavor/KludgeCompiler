@@ -51,6 +51,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
                     store(timingsVar, Type.getType("Lco/aikar/timings/Timings;")) // _
                     visitTryCatchBlock(tryStart, tryEnd, jumpTo, null)
                     visitLabel(tryStart)
+                    nop()
                 }
             }
 

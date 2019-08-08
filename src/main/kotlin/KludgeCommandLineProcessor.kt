@@ -9,10 +9,20 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 @AutoService(CommandLineProcessor::class)
 class KludgeCommandLineProcessor : CommandLineProcessor {
 
-    override val pluginId: String = "kludge"
-    override val pluginOptions: Collection<AbstractCliOption> = listOf(
-        CliOption("onByDefault", "<true|false>", "whether optional-to-nullable is on by default")
-    )
+    init {
+        println("CLI processor instantiated")
+    }
+
+    override val pluginId: String get() {
+        println("Retrieved plugin ID")
+        return "kludge"
+    }
+    override val pluginOptions: Collection<AbstractCliOption> get() {
+        println("Retrieved plugin options")
+        return listOf(
+            CliOption("onByDefault", "<true|false>", "whether optional-to-nullable is on by default", required = false)
+        )
+    }
 
     override fun processOption(option: AbstractCliOption, value: String, configuration: CompilerConfiguration) {
         println("Processing CLI options")
