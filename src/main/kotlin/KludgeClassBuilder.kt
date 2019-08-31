@@ -34,6 +34,7 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
         val function = origin.descriptor as? FunctionDescriptor ?: return original
         val annotation = function.annotations.findAnnotation(FqName(timingsAnnotation)) ?: return original
         val timingName = annotation.allValueArguments.getValue(Name.identifier("value")).value as? String ?: function.name.identifier
+        val lineNo = origin.element?.containingFile?.text?.substring(0..origin.element!!.textRange.startOffset)?.count { it == '\n' } // why is there no 'get line number' method ffs
         return object: MethodVisitor(Opcodes.ASM5, original) {
 
             val tryStart = Label()
@@ -43,12 +44,18 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
             override fun visitCode() {
                 super.visitCode()
                 InstructionAdapter(this).apply {
+                    val startLabel = Label()
+                    visitLabel(startLabel)
+                    if (lineNo != null) {
+                        visitLineNumber(lineNo, startLabel)
+                    }
                     invokestatic("flavor/pie/kludge/GlobalKt", "getPlugin", "()Ljava/lang/Object;", false) // plugin
                     visitLdcInsn(timingName) // plugin | name constant
                     invokestatic("co/aikar/timings/Timings", "ofStart", "(Ljava/lang/Object;Ljava/lang/String;)Lco/aikar/timings/Timing;", false) // timing
                     store(timingsVar, Type.getType("Lco/aikar/timings/Timings;")) // _
                     visitTryCatchBlock(tryStart, tryEnd, jumpTo, null)
                     visitLabel(tryStart)
+                    nop()
                 }
             }
 
@@ -57,23 +64,42 @@ class KludgeClassBuilder(private val delegateBuilder: ClassBuilder) : Delegating
                     Opcodes.RETURN, Opcodes.ARETURN, Opcodes.IRETURN, Opcodes.DRETURN, Opcodes.FRETURN,
                     Opcodes.LRETURN -> {
                         InstructionAdapter(this).apply {
+                            val endLabel = Label()
+                            visitLabel(endLabel)
+                            if (lineNo != null) {
+                                visitLineNumber(lineNo, endLabel)
+                            }
                             visitVarInsn(Opcodes.ALOAD, timingsVar) // timings
                             aconst(null) // timings | null
                             invokestatic("kotlin/jdk7/AutoCloseableKt", "closeFinally", "(Ljava/lang/AutoCloseable;Ljava/lang/Throwable;)V", false) // _
                             visitLabel(tryEnd)
-                            super.visitInsn(opcode)
-                            visitLabel(jumpTo) // exception
-                            dup() // exception | exception
-                            visitVarInsn(Opcodes.ALOAD, timingsVar) // exception | exception | timings
-                            swap() // exception | timings | exception
-                            invokestatic("kotlin/jdk7/AutoCloseableKt", "closeFinally", "(Ljava/lang/AutoCloseable;Ljava/lang/Throwable;)V", false) // exception
-                            athrow()
+                            nop()
                         }
+                        super.visitInsn(opcode)
                     }
                     else -> super.visitInsn(opcode)
                 }
             }
 
+            override fun visitMaxs(maxStack: Int, maxLocals: Int) {
+                InstructionAdapter(this).apply {
+                    visitLabel(jumpTo) // exception
+                    if (lineNo != null) {
+                        visitLineNumber(lineNo, jumpTo)
+                    }
+                    dup() // exception | exception
+                    visitVarInsn(Opcodes.ALOAD, timingsVar) // exception | exception | timings
+                    swap() // exception | timings | exception
+                    invokestatic(
+                        "kotlin/jdk7/AutoCloseableKt",
+                        "closeFinally",
+                        "(Ljava/lang/AutoCloseable;Ljava/lang/Throwable;)V",
+                        false
+                    ) // exception
+                    athrow()
+                }
+                super.visitMaxs(maxStack, maxLocals)
+            }
         }
     }
 
